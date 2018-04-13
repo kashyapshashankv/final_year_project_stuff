@@ -1,0 +1,30 @@
+#include  <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+int msg[1];
+RF24 radio(9,10);
+const uint64_t pipe = 0xE8E8F0F0E1LL;
+int SW1 = 7;
+int SW2 = 6;
+void setup(void){
+ Serial.begin(9600);
+ radio.begin();
+ radio.openWritingPipe(pipe);
+ pinMode(SW1,INPUT);
+ pinMode(SW2,INPUT);
+ 
+ }
+ void loop(void){
+ if (digitalRead(SW1) == HIGH){
+  Serial.println("SW1");
+ msg[0] = 111;
+ radio.write(msg, 1);
+ 
+ }
+ if(digitalRead(SW2) == HIGH){
+  Serial.println("SW2");
+  msg[0]=222;
+  radio.write(msg, 1);
+  
+  }
+ }
