@@ -1,0 +1,126 @@
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+#include"rfid1.h"
+RFID1 rfid;
+uchar serNum[5];
+int msg[1];
+int ir1=8;
+String a;
+int nr=55;
+int nrff=77;
+int rf=66;
+int stationcheck=5;
+String station="177994591";
+String base ="3252194233";
+RF24 radio(9,10);
+const uint64_t pipe = 0xE8E8F0F0E1LL;
+int LED1 = A0;
+void setup(void){
+ Serial.begin(9600);
+ rfid.begin(7, 5, 4, 3, 6, 2);
+  delay(100);
+  rfid.init();
+ radio.begin();
+ radio.openReadingPipe(1,pipe);
+ radio.startListening();
+ pinMode(LED1, OUTPUT);
+ digitalWrite(LED1 ,HIGH);
+ }
+ void loop(void){
+ nrf();
+ irs(); 
+ rftag();
+  }
+
+  void nrf(){
+    if (radio.available()){
+      nrff=88;
+   bool done = false;    
+   while (!done){
+     done = radio.read(msg, 1);      
+     //Serial.println(msg[0]);
+     if (msg[0] == 111)
+     {delay(10);
+     digitalWrite(LED1, LOW);
+     nr=22;     
+     }
+     else if(msg[0] ==222) 
+     {
+      digitalWrite(LED1, LOW);
+      nr=33;
+      }
+     delay(10);}
+     Serial.println(nr);
+     }
+    }
+
+    void irs(){
+      if(nrff==88){
+      int data1=digitalRead(ir1);
+      if(data1==0){
+        digitalWrite(LED1 , HIGH);
+        Serial.println("Obstacle detected");
+        }
+        else if(data1==1){
+          digitalWrite(LED1 , LOW);
+          }
+      }
+    }
+
+
+  void rftag(){
+    uchar status;
+    uchar str[MAX_LEN];
+  // Search card, return card types
+  status = rfid.request(PICC_REQIDL, str);
+  if (status != MI_OK)
+  {
+    return;
+  }
+  // Show card type
+  //rfid.showCardType(str);
+  //Prevent conflict, return the 4 bytes Serial number of the card
+  status = rfid.anticoll(str);
+
+  if (status == MI_OK)
+  {
+    memcpy(serNum, str, 5);
+    a="";
+
+    for(int i = 0; i < 4; i++)
+    {
+    a.concat(serNum[i]);
+    }
+    
+    //Serial.println(a);//show the card ID
+  }
+
+  if(nr==22){
+    if(a==station){
+      nr=55;
+      nrff=77;
+      stationcheck=6;
+      digitalWrite(LED1,HIGH);
+      Serial.println("station Arrived");
+      }
+    }
+  if(nr==33){
+    if(a==base){
+      if(stationcheck=6){
+      nr=55;
+      nrff=77;
+      stationcheck=5;
+      digitalWrite(LED1,HIGH);
+      Serial.println("Base Arrived");
+      }
+    }
+  }
+
+  delay(500);
+  
+
+  rfid.halt();
+        }
+  
+  
